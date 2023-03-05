@@ -1,10 +1,9 @@
 import logging
 from torch.utils.data import DataLoader
 from helper import *
-
-from dataloader_max_margin import *
+from utils import cos_sim
+from dataloader_CL import *
 from model_CL import KGEModel
-from Batch_TrainData_Generator import Batch_TrainData_Generator
 import pickle
 
 
@@ -65,7 +64,7 @@ class Train_Embedding_Model(object):
     Learns embeddings for NPs and relation phrases
     """
 
-    def __init__(self, params, side_info, E_init, R_init, elseed_pair,canseed_pair, new_seed_triples, new_seed_sim,elscoredict,canscoredict):
+    def __init__(self, params, side_info, E_init, R_init, elseed_pair,canseed_pair, new_seed_triples, new_seed_sim):
         self.p = params
         self.side_info = side_info
         self.E_init = E_init
@@ -74,8 +73,6 @@ class Train_Embedding_Model(object):
         self.canseed_pair = canseed_pair
         # self.new_seed_trpIds = new_seed_triples
         self.new_seed_sim = new_seed_sim
-        self.elscoredict=elscoredict
-        self.canscoredict=canscoredict
 
     def __del__(self):
         print("Train_Embedding_Model del ... ")
@@ -203,14 +200,14 @@ class Train_Embedding_Model(object):
                 for i in range(28797, 1798923):
                     ent2.append(self.side_info.ent2id[str(i)])
                 seed_dataloader_head = DataLoader(
-                    ELSeedDataset(self.el_seed_pair_list, nentity, nrelation, self.p.cross_negative_sample_size, 'head-batch',ent1,self.elscoredict),
+                    ELSeedDataset(self.el_seed_pair_list, nentity, nrelation, self.p.cross_negative_sample_size, 'head-batch',ent1),
                     batch_size=self.p.cross_batch_size,
                     shuffle=True,
                     collate_fn=ELSeedDataset.collate_fn
                 )
 
                 seed_dataloader_tail = DataLoader(
-                    ELSeedDataset(self.el_seed_pair_list, nentity, nrelation, self.p.cross_negative_sample_size, 'tail-batch',ent2,self.elscoredict),
+                    ELSeedDataset(self.el_seed_pair_list, nentity, nrelation, self.p.cross_negative_sample_size, 'tail-batch',ent2),
                     batch_size=self.p.cross_batch_size,
                     shuffle=True,
                     collate_fn=ELSeedDataset.collate_fn
@@ -223,27 +220,26 @@ class Train_Embedding_Model(object):
                     ent1.append(self.side_info.ent2id[str(i)])
                     ent2.append(self.side_info.ent2id[str(i)])
                 seed_dataloader_head = DataLoader(
-                    CanSeedDataset(self.canseed_pair, nentity, nrelation, self.p.cross_negative_sample_size, 'head-batch',ent1,self.canscoredict),
+                    CanSeedDataset(self.canseed_pair, nentity, nrelation, self.p.cross_negative_sample_size, 'head-batch',ent1),
                     batch_size=self.p.cross_batch_size,
                     shuffle=True,
                     collate_fn=CanSeedDataset.collate_fn
                 )
 
                 seed_dataloader_tail = DataLoader(
-                    CanSeedDataset(self.canseed_pair, nentity, nrelation, self.p.cross_negative_sample_size, 'tail-batch',ent2,self.canscoredict),
+                    CanSeedDataset(self.canseed_pair, nentity, nrelation, self.p.cross_negative_sample_size, 'tail-batch',ent2),
                     batch_size=self.p.cross_batch_size,
                     shuffle=True,
                     collate_fn=CanSeedDataset.collate_fn
                 )
-                self.canseed_iterator1 = BidirectionalOneShotIterator(seed_dataloader_head, seed_dataloader_tail)
-
+                self.canseed_iterator = BidirectionalOneShotIterator(seed_dataloader_head, seed_dataloader_tail)
 
             # Training Loop
             loss_list = []
             step_list = []
             for step in range(init_step, self.p.max_steps):
 
-                log = kge_model.train_step(self.p, kge_model, optimizer, self.train_iterator,self.elseed_iterator,self.canseed_iterator1)
+                log = kge_model.train_step(self.p, kge_model, optimizer, self.train_iterator,self.elseed_iterator,self.canseed_iterator)
                 loss = log['loss']
                 loss_list.append(loss)
                 step_list.append(step)
@@ -267,4 +263,5 @@ class Train_Embedding_Model(object):
 
         self.entity_embedding = kge_model.entity_embedding.detach().cpu().numpy()
         self.relation_embedding = kge_model.relation_embedding.detach().cpu().numpy()
+        KGEModel.remove_logger(self)
         return self.entity_embedding, self.relation_embedding

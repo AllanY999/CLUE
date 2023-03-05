@@ -15,6 +15,7 @@ import numpy as np
 from tqdm import tqdm
 import torch.nn.functional as F
 
+
 def hinge_loss(positive_score, negative_score, gamma):
     err = positive_score - negative_score + gamma
     max_err = err.clamp(0)
@@ -253,9 +254,9 @@ class KGEModel(nn.Module):
         optimizer.zero_grad()
 
         positive_sample1, negative_sample1, subsampling_weight, mode1 = next(train_iterator)
-        positive_sample2, negative_sample2, mode2,score2 = next(seed_iterator1)
+        positive_sample2, negative_sample2, mode2 = next(seed_iterator1)
 
-        positive_sample3, negative_sample3, mode3,score3 = next(seed_iterator2)
+        positive_sample3, negative_sample3, mode3 = next(seed_iterator2)
 
         if args.cuda:
             positive_sample1 = positive_sample1.cuda()
@@ -266,8 +267,6 @@ class KGEModel(nn.Module):
             gamma2 = gamma2.cuda()
             positive_sample3 = positive_sample3.cuda()
             negative_sample3 = negative_sample3.cuda()
-            score2=score2.unsqueeze(1).cuda()
-            score3 = score3.unsqueeze(1).cuda()
         negative_score1 = model((positive_sample1, negative_sample1), mode=mode1)
 
         positive_score1 = model(positive_sample1)
@@ -278,9 +277,6 @@ class KGEModel(nn.Module):
         negative_score2 = model((positive_sample2, negative_sample2), mode=mode2)
 
         positive_score2 = model(positive_sample2, mode='align')
-
-        positive_score2 = positive_score2*score2
-
         positive_score2 = positive_score2.repeat(1, negative_sample_size2)
 
         loss2pos = positive_score2
@@ -288,7 +284,6 @@ class KGEModel(nn.Module):
 
         negative_score3 = model((positive_sample3, negative_sample3), mode=mode3)
         positive_score3 = model(positive_sample3, mode='align')
-        positive_score3 = positive_score3 * score3
         positive_score3 = positive_score3.repeat(1, negative_sample_size2)
 
         loss3pos = positive_score3
@@ -304,6 +299,7 @@ class KGEModel(nn.Module):
             )
             loss = loss + regularization
             regularization_log = {'regularization': regularization.item()}
+
         else:
             regularization_log = {}
 
@@ -396,7 +392,9 @@ class KGEModel(nn.Module):
         console.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
         console.setFormatter(formatter)
-        logging.getLogger('').addHandler(console)
+        log = logging.getLogger('')
+
+        log.addHandler(console)
 
     def log_metrics(self, mode, step, metrics):
         '''
@@ -404,3 +402,7 @@ class KGEModel(nn.Module):
         '''
         for metric in metrics:
             logging.info('%s %s at step %d: %f' % (mode, metric, step, metrics[metric]))
+    def remove_logger(self):
+
+        log = logging.getLogger('')
+        log.removeHandler(log.handlers[-1])

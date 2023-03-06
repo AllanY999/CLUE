@@ -290,6 +290,11 @@ class Embeddings(object):
         relation_seed_cluster_list = seed_pair2cluster(relation_seed_pair_list, clean_ent_list)
 
 
+        self.seed_trpIds, self.seed_sim = pair2triples(relation_seed_pair_list, clean_ent_list, self.side_info.ent2id,
+                                               self.side_info.id2ent, self.side_info.ent2triple_id_list,
+                                               self.side_info.trpIds, self.E_init, cos_sim, is_cuda=False,
+                                               high_confidence=False)
+
         if self.p.use_Embedding_model:
             fname1, fname2 = folder_to_make+ '1E_init',  folder_to_make+ '1R_init'
             if not checkFile(fname1) or not checkFile(fname2):

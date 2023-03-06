@@ -213,8 +213,7 @@ def cano(ite:int,args):
         if id in isSub:
             relation_view_embed.append(np2embed[id])
     print("Start predicting k for clustering!")
-    #k=findkbydb(relation_view_embed)
-    k=800
+    k=findkbydb(relation_view_embed)
     threshold_or_cluster = 'cluster'
     if threshold_or_cluster == 'threshold':
         cluster_threshold_real = 0.02

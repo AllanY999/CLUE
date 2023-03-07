@@ -299,7 +299,7 @@ class Embeddings(object):
             pickle.dump(self.EL_seed, open(fname_EL, 'wb'))
         else:
             self.EL_seed = pickle.load(open(fname_EL, 'rb'))
-        print('self.EL_seed:', type(self.EL_seed), len(self.EL_seed))
+
 
         fname_Can = './file/' + self.p.dataset + '_' + self.p.split + '/Can_seed'
         if not checkFile(fname_Can):

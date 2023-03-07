@@ -2,7 +2,7 @@ import numpy as np
 import warnings
 warnings.simplefilter(action='ignore',category=FutureWarning)
 from find_k_methods import elbow_method, davies_bouldin
-
+from tqdm import tqdm
 from sklearn.cluster import KMeans
 
 import time
@@ -44,7 +44,7 @@ def findkbydb(npemb):
 
     #km1 = KMeans(n_clusters=k_max, n_init=30, max_iter=300, tol=1e-4, algorithm='auto', n_jobs=n_jobs,random_state=666).fit(input_embed)
 
-    for i in range(len(k_list)):
+    for i in tqdm(range(len(k_list))):
         k = k_list[i]
         km1 = KMeans(n_clusters=k, n_init=30, max_iter=300, tol=1e-9, n_jobs=n_jobs).fit(input_embed)
 
@@ -78,7 +78,7 @@ def findkbydb(npemb):
 
             if method == 'davies_bouldin':
                 index = np.zeros((len(k_list)))
-                for i in range(len(k_list)):
+                for i in tqdm(range(len(k_list))):
                     k = k_list[i]
                     if k != 1:
                         km1 = KMeans(n_clusters=k, n_init=30, max_iter=300, tol=1e-9, n_jobs=n_jobs).fit(data)

@@ -7,6 +7,8 @@ import os, argparse, pickle, codecs
 from test_performance import cluster_test, HAC_getClusters
 from collections import defaultdict as ddict
 from findkbyDB import findkbydb
+from tqdm import tqdm
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 ''' *************************************** DATASET PREPROCESSING **************************************** '''
 
@@ -55,7 +57,7 @@ def link(ite:int):
         confidence = dict()
         errcount = 0
 
-        for i in range(28797):
+        for i in tqdm(range(28797)):
             queryid = ent2id[str(i)]
             queryemb = ent2embed[queryid]
             if str(i) in resdict.keys():

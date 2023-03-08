@@ -15,7 +15,6 @@ def findkbydb(npemb):
     if dataset == 'OPIEC' or dataset == 'reverb45k':
         E_init = npemb
         input_embed = []
-        print(np.shape(E_init)[0])
         for id in range(np.shape(E_init)[0]):
 
             input_embed.append(E_init[id])

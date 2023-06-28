@@ -8,8 +8,9 @@ from test_performance import cluster_test, HAC_getClusters
 from collections import defaultdict as ddict
 from findkbyDB import findkbydb
 from tqdm import tqdm
+import torch
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+torch.cuda.set_device(1)
 ''' *************************************** DATASET PREPROCESSING **************************************** '''
 
 
@@ -103,7 +104,7 @@ def link(ite:int):
 
     inv_map = {}
     for k, v in result.items():
-         if math.log(1+math.exp(confidence[k]),math.e)>0.95+0.05*math.exp(-(ite+1)/10):#threshold
+         if math.log(2-confidence[k],math.e)<math.exp(-1/(ite+1)):
 
             inv_map[v] = inv_map.get(v, [])
             inv_map[v].append(k)
@@ -117,7 +118,7 @@ def link(ite:int):
             for tuple in cc:
                 a = tuple[0]
                 b = tuple[1]
-                confid = (confidence[a] + confidence[b]) / 2
+                confid = (1 -(math.log(2-confidence[a],math.e)/math.exp(-1/(ite+1))))* (1 -(math.log(2-confidence[b],math.e)/math.exp(-1/(ite+1))))
                 dst.writelines(a + '#####' + b + '#####' + str(confid) + '\n')
 
 

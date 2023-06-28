@@ -99,13 +99,14 @@ def generatelinkseed(myclust2ent,ent2id,id2ent,ite):
         if len(count[label])>0:
             clusterentropy[label]=entropy(count[label])
             maxcount[label]=max(count[label],key=lambda k:count[label][k])
-            clusterconfidence[label]=negexp(entropy(count[label]))
+            #clusterconfidence[label]=negexp(entropy(count[label]))
 
     labels=[]
     error=0
     for label,v in clusterentropy.items():
-        if math.log(1+math.exp(-v),math.e)>0.3+0.1*math.exp(-(ite+1)/10) :
+        if math.log(2-math.exp(-v),math.e)<math.exp(-1/(ite+1)) :
             labels.append(label)
+            clusterconfidence[label] = 1 -(math.log(2-math.exp(-v),math.e)/math.exp(-1/(ite+1)))
     for label in labels:
         for np in myclust2ent[label]:
             if np not in resdict.keys():

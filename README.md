@@ -1,6 +1,6 @@
 # The Framework CLUE
 
-Codes and data set for WWW2024: Jointly Canonicalizing and Linking Open Knowledge Base via Unified Embedding Learning.
+WWW2024: Jointly Canonicalizing and Linking Open Knowledge Base via Unified Embedding Learning
 ## Environment
 
 Computational platform: PyTorch 1.4.0, NVIDIA Geforce RTX 3090 (GPU), Inter i9-10900X (CPU), CUDA Toolkit 10.0

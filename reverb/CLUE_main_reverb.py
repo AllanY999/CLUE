@@ -53,7 +53,7 @@ def link(ite:int):
             resdict.update(dict1)
 
         result = dict()
-        totalcandi = [str(i) for i in range(21856, 1045274)]
+        totalcandi = [str(i) for i in range(28797, 1798922)]
 
         confidence = dict()
         errcount = 0
